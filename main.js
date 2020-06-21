@@ -6,10 +6,13 @@ window.onload = function() {
     function draw(st) {
       /* board */
       ctx.clearRect(0, 0, width, height);
-      
+     console.log(st); 
       /* food */
       ctx.fillStyle = '#ff0000';
-      ctx.fillRect(st.food.x * size, st.food.y * size, size, size);
+      ctx.beginPath();
+      ctx.arc(st.food.x * size + size / 2, st.food.y * size + size / 2,
+        size / 2 - 1, 0, 2 * Math.PI);
+      ctx.fill();
      
       /* snake */
       ctx.fillStyle = '#00ff00';
@@ -43,13 +46,14 @@ window.onload = function() {
 
     const step = t1 => t2 => {
       if (t2 - t1 > delay) { 
-        if (state.isDead) {
-          alert(`Game Over!\nYour score: ${state.snake.length - initState.snake.length}`);
+                  
+        
+        if (!state.snake.length) {
+          alert('Game Over!');
           return;
         }
-        
-        state = draw( next(state) );
-        
+        draw(state);
+        state = next(state);
         window.requestAnimationFrame( step(t2) );
       } else {
         window.requestAnimationFrame( step(t1) );
@@ -72,8 +76,8 @@ window.onload = function() {
     const delay = 1e3 / fps;
     const size = 20;
     
-    const cols = Math.round(width / size);
-    const rows = Math.round(height / size);
+    const cols = Math.floor(width / size);
+    const rows = Math.floor(height / size);
 
     let state = resize(Object.assign({}, initState), cols, rows);
 

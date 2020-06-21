@@ -15,15 +15,12 @@ const initState = {
     {x: 1, y: 0},
     {x: 0, y: 0}
   ],
-  isDead: false,
   moves: [
     dir.pX 
   ],
   food: {x: 13, y: 25}
 };
 
-/* Helper Functions 
-++++++++++++++++++++++ */
 const isEq = (a, b) => 
   a.x == b.x && a.y == b.y;
 
@@ -36,7 +33,7 @@ const mod = (c, lim) =>
 const isIn = (pos, arr) => 
   arr.some(item => isEq(item, pos));
 
-const getFood = (cols, rows) => ({
+const food = (cols, rows) => ({
   x: Math.floor(Math.random() * 100 % cols),
   y: Math.floor(Math.random() * 100 % rows)
 });
@@ -55,8 +52,9 @@ const willDie = (st) =>
 const willEat = (st) =>
   isEq(nextHead(st), st.food);
 
-/* Alter State 
-++++++++++++++++++++++ */
+const glue = (head, sn, len) =>
+  [head].concat(sn.slice(0, len));
+
 const enqueueMove = (st, mv) => ({
   ...st,
   moves: isValidMove(st.moves[st.moves.length - 1], mv)
@@ -70,37 +68,18 @@ const resize = (st, x, y) => ({
   rows: y > -1 ? y : st.rows
 });
 
-/* Generate Next State 
-++++++++++++++++++++++ */
-const next = (st) => {
-  if (willDie(st)) {
-    return { ...st,
-      isDead: 
-        true,
-      moves: 
-        popMove(st.moves)
-    }
-  } else if (willEat(st)) {
-    return { ...st,
-      snake: 
-        [nextHead(st)]
-        .concat(st.snake
-        .slice(0, st.snake.length)),
-      food: 
-        getFood(st.cols, st.rows),
-      moves: 
-        popMove(st.moves)
-    }
-  } else {
-    return { ...st,
-      snake: 
-        [nextHead(st)]
-        .concat(st.snake
-        .slice(0, st.snake.length - 1)),
-      moves:
-        popMove(st.moves)
-    }
-  }
-};
+const next = (st) => ({
+  ...st,
+  snake: willDie(st)
+    ? []    
+    : glue(nextHead(st), st.snake, 
+      willEat(st) 
+        ? st.snake.length 
+        : st.snake.length - 1),
+  moves: popMove(st.moves),
+  food: willEat(st)
+    ? food(st.cols, st.rows)
+    : st.food
+});
 
 export { dir, initState, next, enqueueMove, resize };
